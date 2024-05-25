@@ -7,6 +7,7 @@ export default function SearchBox() {
   const searchId = useId();
   const dispatch = useDispatch();
   const filter = useSelector(selectNameFilter);
+
   return (
     <div className={css.form}>
       <label className={css.label} htmlFor={searchId}>

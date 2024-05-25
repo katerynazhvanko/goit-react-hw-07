@@ -1,55 +1,33 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Toaster } from "react-hot-toast";
 
 import ContactForm from "./components/ContactForm/ContactForm";
 import ContactList from "./components/ContactList/ContactList";
 import SearchBox from "./components/SearchBox/SearchBox";
+import Loader from "./components/Loader/Loader";
+import ErrorMessage from "./components/ErrorMessage/ErrorMessage";
 
-import { Toaster } from "react-hot-toast";
-
-const getInitialContacts = () => {
-  const savedContacts = window.localStorage.getItem("contacts");
-
-  return savedContacts !== null ? JSON.parse(savedContacts) : [];
-};
+import { fetchContacts } from "./redux/contactsOps";
+import { selectLoading, selectError } from "./redux/contactsSlice";
 
 export default function App() {
-  const [contacts, setContacts] = useState(getInitialContacts);
-  const [filter, setFilter] = useState("");
-
-  // save in memory between reload page
+  const dispatch = useDispatch();
+  const isLoading = useSelector(selectLoading);
+  const isError = useSelector(selectError);
 
   useEffect(() => {
-    window.localStorage.setItem("contacts", JSON.stringify(contacts));
-  }, [contacts]);
-
-  //add components
-
-  const addContact = (newContact) => {
-    console.log(newContact);
-    setContacts((prevContacts) => {
-      return [...prevContacts, newContact];
-    });
-  };
-
-  // delete component
-
-  const deleteContact = (contactId) => {
-    setContacts((prevContacts) => {
-      return prevContacts.filter((contact) => contact.id !== contactId);
-    });
-  };
-
-  // filter contacts
-  const visibleContacts = contacts.filter((contact) =>
-    contact.name.toLowerCase().includes(filter.toLowerCase())
-  );
+    dispatch(fetchContacts());
+  }, [dispatch]);
 
   return (
     <>
       <h1>Phonebook</h1>
-      <ContactForm onAddContact={addContact} />
-      <SearchBox value={filter} onFilter={setFilter} />
-      <ContactList contacts={visibleContacts} onDeleteContact={deleteContact} />
+      {isLoading && <Loader />}
+      {isError && <ErrorMessage />}
+      <ContactForm />
+      <SearchBox />
+      <ContactList />
       <Toaster />
     </>
   );
